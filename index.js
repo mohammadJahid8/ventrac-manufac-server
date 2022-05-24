@@ -47,6 +47,22 @@ async function run() {
             res.send(result);
         })
 
+        
+         //update quantity
+         app.put('/tools/:id', async (req, res) => {
+            const id = req.params.id;
+            const newTool = req.body;
+            const query = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    quantity: newTool.quantity,
+                }
+            };
+            const result = await toolsCollection.updateOne(query, updatedDoc, options);
+            res.send(result);
+        });
+
 
 
     } finally {
