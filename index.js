@@ -80,6 +80,12 @@ async function run() {
       res.send(result);
     });
 
+    //get all users
+    app.get("/users", async (req, res) => {
+      const users = await usersCollection.find({}).toArray();
+      res.send(users);
+    });
+
     //put all users in database
     app.put("/user/:email", async (req, res) => {
       const email = req.params.email;
