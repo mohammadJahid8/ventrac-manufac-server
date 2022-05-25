@@ -38,6 +38,7 @@ async function run() {
     const toolsCollection = client.db("ventrac").collection("tools");
     const ordersCollection = client.db("ventrac").collection("orders");
     const usersCollection = client.db("ventrac").collection("users");
+    const reviewsCollection = client.db("ventrac").collection("reviews");
 
     //get all tools
     app.get("/tools", async (req, res) => {
@@ -56,8 +57,14 @@ async function run() {
     //post orders
     app.post("/orders", async (req, res) => {
       const order = req.body;
-      console.log(order);
       const result = await ordersCollection.insertOne(order);
+      res.send(result);
+    });
+
+    //post reviews
+    app.post("/reviews", async (req, res) => {
+      const review = req.body;
+      const result = await reviewsCollection.insertOne(review);
       res.send(result);
     });
 
