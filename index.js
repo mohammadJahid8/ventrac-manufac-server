@@ -8,6 +8,22 @@ require("dotenv").config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 app.use(cors());
+const corsConfig = {
+  origin: "*",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+};
+app.use(cors(corsConfig));
+app.options("*", cors(corsConfig));
+app.use(express.json());
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept,authorization"
+  );
+  next();
+});
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.rpxyo.mongodb.net/?retryWrites=true&w=majority`;
@@ -148,7 +164,7 @@ async function run() {
     });
 
     //put all users in database
-    app.put("/user/:email", async (req, res) => {
+    app.put("/user/:email", verifyJWT, async (req, res) => {
       const email = req.params.email;
       const user = req.body;
       const filter = { email: email };
@@ -227,7 +243,7 @@ async function run() {
     });
 
     //update a order
-    app.put("/all-orders/:id", async (req, res) => {
+    app.put("/all-orders/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       const newStatus = req.body;
       const query = { _id: ObjectId(id) };
