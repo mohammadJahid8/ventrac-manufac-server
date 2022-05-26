@@ -46,6 +46,13 @@ async function run() {
       res.send(tools);
     });
 
+    //post tools
+    app.post("/tools", verifyJWT, async (req, res) => {
+      const tool = req.body;
+      const result = await toolsCollection.insertOne(tool);
+      res.send(result);
+    });
+
     //get a single tool by id
     app.get("/tools/:id", async (req, res) => {
       const id = req.params.id;
@@ -55,21 +62,27 @@ async function run() {
     });
 
     //post orders
-    app.post("/orders", async (req, res) => {
+    app.post("/orders", verifyJWT, async (req, res) => {
       const order = req.body;
       const result = await ordersCollection.insertOne(order);
       res.send(result);
     });
 
     //post reviews
-    app.post("/reviews", async (req, res) => {
+    app.post("/reviews", verifyJWT, async (req, res) => {
       const review = req.body;
       const result = await reviewsCollection.insertOne(review);
       res.send(result);
     });
 
+    //get all reviews
+    app.get("/reviews", verifyJWT, async (req, res) => {
+      const reviews = await reviewsCollection.find({}).toArray();
+      res.send(reviews);
+    });
+
     //update quantity
-    app.put("/tools/:id", async (req, res) => {
+    app.put("/tools/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       const newTool = req.body;
       const query = { _id: ObjectId(id) };
