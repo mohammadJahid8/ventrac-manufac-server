@@ -23,7 +23,7 @@ app.use(function (req, res, next) {
     "Origin, X-Requested-With, Content-Type, Accept,authorization"
   );
   next();
-});\
+});
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.rpxyo.mongodb.net/?retryWrites=true&w=majority`;
