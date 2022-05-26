@@ -117,14 +117,14 @@ async function run() {
     });
 
     //post reviews
-    app.post("/reviews", verifyJWT, async (req, res) => {
+    app.post("/reviews", async (req, res) => {
       const review = req.body;
       const result = await reviewsCollection.insertOne(review);
       res.send(result);
     });
 
     //get all reviews
-    app.get("/reviews", verifyJWT, async (req, res) => {
+    app.get("/reviews", async (req, res) => {
       const reviews = await reviewsCollection.find({}).toArray();
       res.send(reviews);
     });
