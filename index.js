@@ -180,6 +180,14 @@ async function run() {
       }
     });
 
+    //get orders by specific id
+    app.get("/orders/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const order = await ordersCollection.findOne(query);
+      res.send(order);
+    });
+
     //Delete a order
     app.delete("/order/:id", async (req, res) => {
       const id = req.params.id;
