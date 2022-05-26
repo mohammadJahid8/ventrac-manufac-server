@@ -72,7 +72,7 @@ async function run() {
     });
 
     //get a single tool by id
-    app.get("/tools/:id", async (req, res) => {
+    app.get("/tools/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
       const tool = await toolsCollection.findOne(filter);
@@ -124,7 +124,7 @@ async function run() {
     });
 
     //get all reviews
-    app.get("/reviews", async (req, res) => {
+    app.get("/reviews", verifyJWT, async (req, res) => {
       const reviews = await reviewsCollection.find({}).toArray();
       res.send(reviews);
     });
