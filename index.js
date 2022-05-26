@@ -220,6 +220,31 @@ async function run() {
       res.send(order);
     });
 
+    //get all orders
+    app.get("/all-orders", verifyJWT, async (req, res) => {
+      const orders = await ordersCollection.find({}).toArray();
+      res.send(orders);
+    });
+
+    //update a order
+    app.put("/all-orders/:id", async (req, res) => {
+      const id = req.params.id;
+      const newStatus = req.body;
+      const query = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: {
+          status: newStatus.status,
+        },
+      };
+      const result = await ordersCollection.updateOne(
+        query,
+        updatedDoc,
+        options
+      );
+      res.send(result);
+    });
+
     //Delete a order
     app.delete("/order/:id", async (req, res) => {
       const id = req.params.id;
