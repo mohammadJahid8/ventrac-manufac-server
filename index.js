@@ -6,6 +6,8 @@ const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const nodemailer = require("nodemailer");
+const mg = require("nodemailer-mailgun-transport");
 
 app.use(cors());
 const corsConfig = {
@@ -13,6 +15,7 @@ const corsConfig = {
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE"],
 };
+
 app.use(cors(corsConfig));
 app.options("*", cors(corsConfig));
 app.use(express.json());
@@ -49,14 +52,66 @@ const verifyJWT = (req, res, next) => {
   });
 };
 
+//sending mail through mailgun
+const auth = {
+  auth: {
+    api_key: "c9dfd494118badc0e6f858572fc88f0a-27a562f9-3551a8ac",
+    domain: "sandbox2ee96933452d4682b1e24787a401ec73.mailgun.org",
+  },
+};
+
+const nodemailerMailgun = nodemailer.createTransport(mg(auth));
+
+function sendOrderMail(order) {
+  const {
+    address,
+    number,
+    quantity,
+    name,
+    productName,
+    email,
+    price,
+    transactionId,
+  } = order;
+
+  var emailSend = {
+    from: "ventrac@gmail.com",
+    to: email,
+    subject: `Your order for ${productName} is is Confirmed`,
+    text: `Your order for ${productName} is is Confirmed`,
+    html: `
+      <div>
+        <p> Hello ${name}, </p>
+        <h3 style="color:green">Your order for ${productName} is confirmed</h3>
+        <p>Your Ordered Quantity: ${quantity}</p>
+        <p>Price: $${price}</p>
+        <h3>Our Address</h3>
+        <p>Andor Killa Bandorban</p>
+        <p>Bangladesh</p>
+        <a href="https://web.programming-hero.com/">unsubscribe</a>
+      </div>
+    `,
+  };
+  nodemailerMailgun.sendMail(emailSend, (err, info) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(info);
+    }
+  });
+}
+
 async function run() {
   try {
     await client.connect();
+    //all collections
     const toolsCollection = client.db("ventrac").collection("tools");
     const ordersCollection = client.db("ventrac").collection("orders");
     const usersCollection = client.db("ventrac").collection("users");
     const reviewsCollection = client.db("ventrac").collection("reviews");
     const paymentCollection = client.db("ventrac").collection("payments");
+
+    /* --------api section started--------- */
 
     //get all tools
     app.get("/tools", async (req, res) => {
@@ -96,6 +151,7 @@ async function run() {
     //post orders
     app.post("/orders", verifyJWT, async (req, res) => {
       const order = req.body;
+      sendOrderMail(order);
       const result = await ordersCollection.insertOne(order);
       res.send(result);
     });
@@ -276,11 +332,19 @@ async function run() {
       const result = await toolsCollection.deleteOne(query);
       res.send(result);
     });
-    //
+
+    /* --------api section ended--------- */
   } finally {
   }
 }
 run().catch(console.dir);
+
+//send email notification for testing purposes
+// app.post("/send-email", async (req, res) => {
+//   const order = req.body;
+//   sendOrderMail(order);
+//   res.send({ status: "success" });
+// });
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
